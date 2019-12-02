@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-public class GeneticAlg implements Serializable{
+public class GeneticAlg implements Serializable {
 
     class Genome implements Comparable<Genome>, Serializable {      // a simple class to handle a single genome
         private ArrayList<Double> weights;            // since no other class needs to know how Genome is implemented
@@ -99,7 +99,7 @@ public class GeneticAlg implements Serializable{
         if (Math.random() > Params.CROSSOVER_RATE) {
             int crossoverIndex = randInt(1, parent1.size() - 1);
             int parentSize = parent1.size();
-            for(int i = crossoverIndex; i < parentSize; i++){
+            for (int i = crossoverIndex; i < parentSize; i++) {
                 parent1.add(parent2.get(i));
                 parent2.add(parent1.get(i));
             }
@@ -113,7 +113,7 @@ public class GeneticAlg implements Serializable{
         // the weights are bounded by the maximum allowed perturbation
 
         if (Math.random() > Params.MUTATION_RATE) {
-            for(int i = 0; i < chromo.size(); i++){
+            for (int i = 0; i < chromo.size(); i++) {
                 chromo.set(i, chromo.get(i) + (Math.random() * Params.MAX_PERTURBATION - (Params.MAX_PERTURBATION / 2)));
             }
         }
@@ -128,7 +128,7 @@ public class GeneticAlg implements Serializable{
             fitnessSoFar += pop.get(i).fitness;
             i++;
         } while (fitnessSoFar < stop);
-        return pop.get(i-1).clone();
+        return pop.get(i - 1).clone();
     }
 
     @SuppressWarnings("unchecked")
@@ -149,7 +149,7 @@ public class GeneticAlg implements Serializable{
             mutate(parentOne.getWeights());
             mutate(parentTwo.getWeights());
             newPop.add(parentOne);
-            if(newPop.size() < popSize){
+            if (newPop.size() < popSize) {
                 newPop.add(parentTwo);
             }
         }
@@ -157,7 +157,7 @@ public class GeneticAlg implements Serializable{
         return pop;                                            // this probably could have been written better, why return a class variable?
     }
 
-    private void grabNBest(int nBest, int numCopies, ArrayList<Genome> popList) { // hopefully the population is sorted correctly...
+    private void grabNBest(int nBest, int numCopies, ArrayList<Genome> popList) {
         while (nBest-- > 0) {
             for (int i = 0; i < numCopies; i++) {
                 popList.add(pop.get(popSize - 1 - nBest));
@@ -174,8 +174,7 @@ public class GeneticAlg implements Serializable{
             if (pop.get(i).fitness > bestFitness) {
                 bestFitness = pop.get(i).fitness;
                 fittestGenome = i;
-            }
-            else if (pop.get(i).fitness < worstFitness) {
+            } else if (pop.get(i).fitness < worstFitness) {
                 worstFitness = pop.get(i).fitness;
             }
             totalFitness += pop.get(i).fitness;

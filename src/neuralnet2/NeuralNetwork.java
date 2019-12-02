@@ -7,7 +7,7 @@ import java.util.Random;
 class NeuralNetwork implements Serializable {                               // as general a description of a neural network as possible so that it can be used in any NN scenario
 
     // a subclass defining a neuron
-    class Neuron implements Serializable {
+    static class Neuron implements Serializable {
         private int numInputs;                             // each neuron takes in inputs
         ArrayList<Double> weights;                         // whose significance is modified by a weight
 
@@ -22,7 +22,7 @@ class NeuralNetwork implements Serializable {                               // a
     }
 
     // a subclass defining a layer of neurons in a network
-    class NeuronLayer implements Serializable {
+    static class NeuronLayer implements Serializable {
         private int numNeurons;                             // a layer consists of at least one neuron
         ArrayList<Neuron> neurons;                          // the neurons of the layer
 

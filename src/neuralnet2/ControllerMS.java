@@ -32,6 +32,7 @@ public class ControllerMS extends JPanel implements ActionListener {
     private Image asteroid;
     private JLabel picLabel;                 // the label that holds the image
     private JLabel dataLabel;                // the label that holds the fitness information
+    private JLabel tickLabel;                // the label that holds how many ticks are left in the current generation
     private JButton saveBtn;
     private JButton loadBtn;
     private DecimalFormat df;
@@ -45,14 +46,16 @@ public class ControllerMS extends JPanel implements ActionListener {
         // create the things to display, then add them
         pic = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
         picLabel = new JLabel(new ImageIcon(pic));
-        dataLabel = new JLabel("                                                                                                        ", SwingConstants.CENTER);
-        dataLabel.setFont(new Font("TimesNewRomanPSMT", Font.BOLD, 20));
+        dataLabel = new JLabel("", SwingConstants.CENTER);
+        dataLabel.setFont(new Font("Helvetica", Font.BOLD, 20));
+        tickLabel = new JLabel("Ticks Left: " + (1600 - ticks));
+        tickLabel.setFont(new Font("Helvetica", Font.PLAIN, 18));
+        tickLabel.setPreferredSize(new Dimension(150, 20));
         try {
-            asteroid = ImageIO.read(new File("resources/asteroid.png"));
+            asteroid = ImageIO.read(new File("resources/images/asteroid.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         // initialize all of the variables!
         numAgents = Params.SWEEPERS;
@@ -79,13 +82,12 @@ public class ControllerMS extends JPanel implements ActionListener {
         goodMines = new ArrayList<>(Params.GOODMINES);
         badMines = new ArrayList<>(Params.BADMINES);
         Random rnd = new Random();
-        for(int i = 0; i < Params.MINES; i++){
-            if(i < Params.GOODMINES){
+        for (int i = 0; i < Params.MINES; i++) {
+            if (i < Params.GOODMINES) {
                 goodMines.add(new Point2D.Double(rnd.nextDouble() * xDim, rnd.nextDouble() * yDim));
             }
-            if(i >= Params.GOODMINES){
+            if (i >= Params.GOODMINES) {
                 badMines.add(new Point2D.Double(rnd.nextDouble() * xDim, rnd.nextDouble() * yDim));
-
             }
         }
 
@@ -106,75 +108,106 @@ public class ControllerMS extends JPanel implements ActionListener {
         for (AgentMS a : agents) {
             a.draw(g);
         }
-        // draw mines
-        g.setColor(new Color(0,123,167));
+        // draw good mines
+        g.setColor(new Color(0, 123, 167));
         for (Point2D m : goodMines) {
             g.fillOval((int) (m.getX() - Params.MINE_SIZE / 2), (int) (m.getY() - Params.MINE_SIZE / 2), (int) Params.MINE_SIZE, (int) Params.MINE_SIZE);
         }
 
+        // draw bad mines
         g.setColor(Color.RED);
-        for (Point2D m : badMines){
-                g.drawImage(asteroid, (int)m.getX() - 9, (int)m.getY() - 9, null);
+        for (Point2D m : badMines) {
+            g.drawImage(asteroid, (int) m.getX() - 9, (int) m.getY() - 9, null);
 //            g.fillRect((int) (m.getX() - Params.MINE_SIZE / 2), (int) (m.getY() - Params.MINE_SIZE / 2), (int) Params.MINE_SIZE, (int) Params.MINE_SIZE);
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void initBtn() {
         saveBtn = new JButton("Save");
         saveBtn.addActionListener(e -> {
             try {
-                FileOutputStream fileOut = new FileOutputStream(new File("tmp/agents.ser"));
-                ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                out.writeObject(agents);
-                fileOut = new FileOutputStream(new File("tmp/pop.ser"));
-                out.writeObject(pop);
-                out.close();
-                fileOut.close();
-                System.out.println("Serialized data is saved in /tmp/agents.ser and /tmp/pop.ser");
+                save("agents", agents);
+                save("pop", pop);
+                save("goodmines", goodMines);
+                save("badmines", badMines);
+                save("ticks", ticks);
+                save("generations", generations);
+                save("generationsText", dataLabel.getText());
+
+                System.out.println("Serialized data saved.");
 
                 BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
                 paint(img.getGraphics());
-                ImageIO.write(img, "png", new File("Game State.png"));
+                File outputFile = new File("tmp/screenshots/Gen" + generations + "@" + (1600-ticks) + "Ticks" + ".png");
+                ImageIO.write(img, "png", outputFile);
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
         });
         loadBtn = new JButton("Load");
         loadBtn.addActionListener(e -> {
-            try {
-                FileInputStream fileIn = new FileInputStream("tmp/agents.ser");
-                ObjectInputStream in = new ObjectInputStream(fileIn);
-                agents = (ArrayList<AgentMS>) in.readObject();
-                fileIn = new FileInputStream("tmp/pop.ser");
-                pop = (ArrayList<Genome>)in.readObject();
-                ticks = 0;
-                in.close();
-                fileIn.close();
-            } catch (IOException | ClassNotFoundException e1){
-                e1.printStackTrace();
-            }
+                agents = (ArrayList<AgentMS>) load("agents", agents);
+                pop = (ArrayList<Genome>) load("pop", pop);
+                goodMines = (ArrayList<Point2D>) load("goodmines", goodMines);
+                badMines = (ArrayList<Point2D>) load("badmines", badMines);
+                ticks = (int) load("ticks", ticks);
+                generations = (int) load("generations", generations);
+                dataLabel.setText((String) load("generationsText", dataLabel.getText()));
         });
+    }
+
+    private void save(String filename, Object toBeSaved) {
+        try {
+            FileOutputStream fileOut = new FileOutputStream(new File("tmp/game-state/" + filename + ".ser"));
+            ObjectOutputStream objectOut = new ObjectOutputStream(fileOut);
+            objectOut.writeObject(toBeSaved);
+            objectOut.close();
+            fileOut.close();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    private Object load(String filename, Object currentState) {
+        try {
+            FileInputStream fileIn = new FileInputStream("tmp/game-state/" + filename + ".ser");
+            ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+            Object toBeLoaded = objectIn.readObject();
+            objectIn.close();
+            fileIn.close();
+            return toBeLoaded;
+        } catch (IOException | ClassNotFoundException e1) {
+            System.out.println("Please save " + filename + " before loading!");
+            return currentState;
+        }
     }
 
     private void addThingsToPanel() {
         setLayout(new GridBagLayout()); // GridBagLayout uses a coordinate system to place components
         GridBagConstraints c = new GridBagConstraints(); // a GridBagConstraints object is used to store the placement, size, and other characteristics of a component
+        c.insets = new Insets(5, 5, 0, 5);
         c.weightx = 0.5; // establishes how space is distributed among each element in the x direction
-        c.fill = GridBagConstraints.HORIZONTAL; // have each component take up all its space in the horizontal dimension
-        c.gridwidth = 2;
+        c.weighty = 0.5;
+        c.gridwidth = 3;
         c.gridx = 0;
         c.gridy = 0;
         add(picLabel, c); // (0, 0)
-        c.insets = new Insets(0,0,0,150);
+        c.insets = new Insets(0, 10, 0, 10);
+        c.anchor = GridBagConstraints.WEST;
         c.gridwidth = 1;
         c.gridy = 1;
-        add(saveBtn, c);
+        add(saveBtn, c); // (0, 1)
         c.gridy = 2;
-        add(loadBtn, c);
+        add(loadBtn, c); // (0, 2)
+        c.anchor = GridBagConstraints.CENTER;
         c.gridy = 1;
         c.gridx = 1;
         c.gridheight = 2;
-        add(dataLabel, c);
+        add(dataLabel, c); // (1, 1)
+        c.anchor = GridBagConstraints.EAST;
+        c.gridx = 2;
+        add(tickLabel, c); // (2, 1)
     }
 
     private void updateAgents() {
@@ -198,7 +231,7 @@ public class ControllerMS extends JPanel implements ActionListener {
 
                 closestMine = agents.get(i).getClosestMine(badMines);
                 foundMine = agents.get(i).checkForMine(badMines, closestMine);
-                if(foundMine >= 0) {
+                if (foundMine >= 0) {
                     agents.get(i).deIncrimentFitness();
                     badMines.set(foundMine, new Point2D.Double(rnd.nextDouble() * pic.getWidth(), rnd.nextDouble() * pic.getHeight()));
                 }
@@ -220,16 +253,13 @@ public class ControllerMS extends JPanel implements ActionListener {
                 agents.get(i).reset();
             }
         }
+        tickLabel.setText("Ticks Left: " + (1600 - ticks));
     }
 
-    // @Override
+    @Override
     public void actionPerformed(ActionEvent e) {
         updateAgents();
         drawThings((Graphics2D) pic.getGraphics());
         repaint();
-    }
-
-    private void createUIComponents() {
-
     }
 }

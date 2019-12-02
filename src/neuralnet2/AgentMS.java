@@ -71,8 +71,8 @@ class AgentMS implements Serializable {
         rotation += rotationForce;
 
         // update the speed and direction of the sweeper
-        speed = Params.MAX_SPEED;
-//        speed = Math.min(Params.MAX_SPEED, lTrack + rTrack);
+//        speed = Params.MAX_SPEED;
+        speed = Math.min(Params.MAX_SPEED, lTrack + rTrack);
         facing.setLocation(-Math.sin(rotation), Math.cos(rotation));
 
         // then update the position, torus style
@@ -131,14 +131,15 @@ class AgentMS implements Serializable {
         g.setColor(new Color(255, 200, 0));
         g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (position.getX() - scale / 2 + facing.getX() * scale), (int) (position.getY() - scale / 2 + facing.getY() * scale));
 
-        g.setColor(new Color(0,123,167));
+        g.setColor(new Color(0, 123, 167));
+        // drawing lines to mines
         g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cGoodMine.getX()), (int) (cGoodMine.getY()));
-//        g.setColor(Color.RED);
-//        g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cBadMine.getX()), (int) (cBadMine.getY()));
+        g.setColor(Color.RED);
+        g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cBadMine.getX()), (int) (cBadMine.getY()));
 
 
         // draw its fitness
-        g.setColor(new Color(0,123,167));
+        g.setColor(new Color(0, 123, 167));
         g.drawString("" + (int) fitness, (int) position.getX() - (int) (scale / 2), (int) position.getY() + 2 * (int) scale);
 
     }
@@ -149,7 +150,7 @@ class AgentMS implements Serializable {
     } // this may need to get more elaborate pending what you would want sweepers to learn...
 
     void deIncrimentFitness() {
-        fitness = fitness / 2;
+        fitness -= 2;
     }
 
     double getFitness() {

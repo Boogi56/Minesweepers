@@ -26,8 +26,8 @@ class Params {
     // these are specific to the mine sweeping scenario
     // for the controller to run the whole simulation
     static final int MINES = 100; // 60
-    static final int GOODMINES = MINES-1;
-    static final int BADMINES = MINES-GOODMINES; // MINES/4
+    static final int GOODMINES = 17*MINES/20;
+    static final int BADMINES = MINES-GOODMINES; // used to be: MINES/4
     static final int SWEEPERS = 45;
     static final int TICKS = 1600;               // how long agents have a chance to gain fitness
     static final double MINE_SIZE = 4;
