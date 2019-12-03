@@ -16,11 +16,14 @@
 * Genetic algorithm that locates the best-performing agents at the end of each generation and prepares new agents after applying crossover and mutation algorithms.
 * Visual representation of the game state for easy interpretation of the progress that the agents have made, which includes an updating status bar below the game window.
 * Save button that serializes the current state of the agents, each of their unique neural networks, the location of each mine, and the remaining time left in the generation.
-* Load button that deserializes the previously-saved game state
+* Load button that deserializes the previously-saved game state.
 
 ## Deployment
 
-Either clone or download the project into your favorite Java IDE (tested in IntelliJ and Eclipse)
+* Either clone or download the project into your favorite Java IDE (tested in IntelliJ and Eclipse)
+* Settings for visualization, the neural networks, the genetic algorithm, the mines, and the agents can be found in the Params class
+  * For an optimal simulation, the default settings are sufficient and need not be changed.
+* To see the inner workings of the agents, uncomment the "Neural Network Visualization" section of the draw function in the AgentMS class.
 
 ## License
 

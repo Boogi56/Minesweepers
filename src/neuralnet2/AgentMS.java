@@ -126,19 +126,19 @@ class AgentMS implements Serializable {
         g.fillOval((int) (position.getX() - scale / 2) + 1, (int) (position.getY() - scale / 2) + 1, (int) scale - 2, (int) scale - 2);
 
         g.rotate(0);
-        // draw the direction it's facing
+        // draw the direction the agent is facing
         g.setTransform(at); // set the transform back to the normal transform
         g.setColor(new Color(255, 200, 0));
         g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (position.getX() - scale / 2 + facing.getX() * scale), (int) (position.getY() - scale / 2 + facing.getY() * scale));
 
-        g.setColor(new Color(0, 123, 167));
-        // drawing lines to mines
-        g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cGoodMine.getX()), (int) (cGoodMine.getY()));
-        g.setColor(Color.RED);
-        g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cBadMine.getX()), (int) (cBadMine.getY()));
+        // NEURAL NETWORK VISUALIZATION
+        // Uncomment to visualize the inputs to each agent's neural network.
+//        g.setColor(new Color(0, 123, 167));
+//        g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cGoodMine.getX()), (int) (cGoodMine.getY()));
+//        g.setColor(Color.RED);
+//        g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cBadMine.getX()), (int) (cBadMine.getY()));
 
-
-        // draw its fitness
+        // draw the agent's fitness
         g.setColor(new Color(0, 123, 167));
         g.drawString("" + (int) fitness, (int) position.getX() - (int) (scale / 2), (int) position.getY() + 2 * (int) scale);
 
