@@ -8,16 +8,17 @@ import java.util.ArrayList;
 import java.util.Random;
 
 class AgentMS implements Serializable {
-    private NeuralNetwork brain;    // each agent has a brain (neural net)
-    private Point2D position;       // where the agent is on the map
-    private Point2D facing;         // which way they're facing (used as inputs) as an (x, y) pair
+    private NeuralNetwork brain;       // each agent has a brain (neural net)
+    private Point2D position;          // where the agent is on the map
+    private Point2D facing;            // which way they're facing (used as inputs) as an (x, y) pair
     private Point2D cGoodMine;
     private Point2D cBadMine;
-    private double rotation;        // the angle from which facing is calculated
-    private double speed;           // the speed of the agent
-    private double lTrack, rTrack;  // the influence rating toward turning left and turning right, used as outputs
-    private double fitness;         // how well the agent is doing, quantified (for the genetic algorithm)
-    private double scale;           // the size of the agent
+    private double rotation;           // the angle from which facing is calculated
+    private double speed;              // the speed of the agent
+    private double lTrack, rTrack;     // the influence rating toward turning left and turning right, used as outputs
+    private double fitness;            // how well the agent is doing, quantified (for the genetic algorithm)
+    private double scale;              // the size of the agent
+    private boolean isInputVisualized; // determines whether or not the neural network's inputs are visualized
 
     AgentMS() { // initialization
         Random rnd = new Random();
@@ -27,6 +28,7 @@ class AgentMS implements Serializable {
         rTrack = 0.16;
         fitness = 0;
         scale = Params.SCALE;
+        isInputVisualized = false;
         position = new Point2D.Double(rnd.nextDouble() * Params.WIN_WIDTH, rnd.nextDouble() * Params.WIN_HEIGHT);
         facing = new Point2D.Double(-Math.sin(rotation), Math.cos(rotation)); // java starts measuring angles at the 90 degree mark.
     }
@@ -132,11 +134,12 @@ class AgentMS implements Serializable {
         g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (position.getX() - scale / 2 + facing.getX() * scale), (int) (position.getY() - scale / 2 + facing.getY() * scale));
 
         // NEURAL NETWORK VISUALIZATION
-        // Uncomment to visualize the inputs to each agent's neural network.
-//        g.setColor(new Color(0, 123, 167));
-//        g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cGoodMine.getX()), (int) (cGoodMine.getY()));
-//        g.setColor(Color.RED);
-//        g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cBadMine.getX()), (int) (cBadMine.getY()));
+        if(isInputVisualized){
+            g.setColor(new Color(0, 123, 167));
+            g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cGoodMine.getX()), (int) (cGoodMine.getY()));
+            g.setColor(Color.RED);
+            g.drawLine((int) (position.getX()), (int) (position.getY()), (int) (cBadMine.getX()), (int) (cBadMine.getY()));
+        }
 
         // draw the agent's fitness
         g.setColor(new Color(0, 123, 167));
@@ -147,7 +150,7 @@ class AgentMS implements Serializable {
 
     void incrementFitness() {
         fitness++;
-    } // this may need to get more elaborate pending what you would want sweepers to learn...
+    }
 
     void deIncrimentFitness() {
         fitness -= 2;
@@ -161,7 +164,16 @@ class AgentMS implements Serializable {
         return brain.getNumberOfWeights();
     }
 
+    public boolean isInputVisualized() {
+        return isInputVisualized;
+    }
+
     void setWeights(ArrayList<Double> w) {
         brain.replaceWeights(w);
     }
+
+    void flipInputVisualization() {
+        isInputVisualized ^= true;
+    }
+
 }

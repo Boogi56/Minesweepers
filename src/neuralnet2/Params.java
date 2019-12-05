@@ -37,4 +37,7 @@ class Params {
     static final double MAX_SPEED = 1.5; // 2    // how fast they can go
     static final int SCALE = 15;                 // the size of the sweepers
 
+    // for the Key Bindings
+    static final String SWITCH_VISUALIZATION = "switch visualization";
+
 }

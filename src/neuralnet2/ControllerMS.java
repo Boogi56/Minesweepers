@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -39,8 +40,6 @@ public class ControllerMS extends JPanel implements ActionListener {
 
     ControllerMS(int xDim, int yDim) {
         setBackground(Color.LIGHT_GRAY);
-        // addMouseListener(new MAdapter());
-        // addMouseMotionListener(new MAdapter());
         setFocusable(true);
         setDoubleBuffered(true);
         // create the things to display, then add them
@@ -91,6 +90,10 @@ public class ControllerMS extends JPanel implements ActionListener {
             }
         }
 
+        // add Key Bindings
+        getInputMap(WHEN_ANCESTOR_OF_FOCUSED_COMPONENT).put(KeyStroke.getKeyStroke("P"), Params.SWITCH_VISUALIZATION);
+        getActionMap().put(Params.SWITCH_VISUALIZATION, new KeyVisualizationAction());
+
         initBtn();
         addThingsToPanel();
 
@@ -139,7 +142,7 @@ public class ControllerMS extends JPanel implements ActionListener {
 
                 BufferedImage img = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
                 paint(img.getGraphics());
-                File outputFile = new File("tmp/screenshots/Gen" + generations + "@" + (1600-ticks) + "Ticks" + ".png");
+                File outputFile = new File("tmp/screenshots/Gen" + generations + "@" + (1600 - ticks) + "Ticks" + ".png");
                 ImageIO.write(img, "png", outputFile);
             } catch (IOException e1) {
                 e1.printStackTrace();
@@ -147,13 +150,15 @@ public class ControllerMS extends JPanel implements ActionListener {
         });
         loadBtn = new JButton("Load");
         loadBtn.addActionListener(e -> {
-                agents = (ArrayList<AgentMS>) load("agents", agents);
-                pop = (ArrayList<Genome>) load("pop", pop);
-                goodMines = (ArrayList<Point2D>) load("goodmines", goodMines);
-                badMines = (ArrayList<Point2D>) load("badmines", badMines);
-                ticks = (int) load("ticks", ticks);
-                generations = (int) load("generations", generations);
-                dataLabel.setText((String) load("generationsText", dataLabel.getText()));
+            boolean oldVisualizationState = agents.get(0).isInputVisualized();
+            agents = (ArrayList<AgentMS>) load("agents", agents);
+            if (agents.get(0).isInputVisualized() != oldVisualizationState) switchVisualization();
+            pop = (ArrayList<Genome>) load("pop", pop);
+            goodMines = (ArrayList<Point2D>) load("goodmines", goodMines);
+            badMines = (ArrayList<Point2D>) load("badmines", badMines);
+            ticks = (int) load("ticks", ticks);
+            generations = (int) load("generations", generations);
+            dataLabel.setText((String) load("generationsText", dataLabel.getText()));
         });
     }
 
@@ -261,5 +266,18 @@ public class ControllerMS extends JPanel implements ActionListener {
         updateAgents();
         drawThings((Graphics2D) pic.getGraphics());
         repaint();
+    }
+
+    private class KeyVisualizationAction extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            switchVisualization();
+        }
+    }
+
+    void switchVisualization() {
+        for (AgentMS agent : agents) {
+            agent.flipInputVisualization();
+        }
     }
 }
